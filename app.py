@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import PyPDF2
 from google import genai
 
-client = genai.Client(api_key="AIzaSyAjStXaudEI9-Ql9qfslqndlI3xMNSWYN8")
+client = genai.Client(api_key="YOUR API KEY")
 
 for m in client.models.list():
     print(m.name)
