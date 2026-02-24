@@ -11,8 +11,6 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
 
 client = genai.Client(api_key= GEMINI_API_KEY)
 
-for m in client.models.list():
-    print(m.name)
 def ask_gemini(question, policy_text):
     prompt = f"""
     You are a placement assistant chatbot.
@@ -37,7 +35,14 @@ def ask_gemini(question, policy_text):
 
 st.set_page_config(page_title= "Placement Dashboard 2026- KNIT", layout= 'wide')
 
-st.title("Placement Dashboard 2026 - KNIT Sultanpur")
+# st.title("Placement Dashboard 2026 - KNIT Sultanpur")
+col1, col2 = st.coloumns([1,5])
+
+with col1:
+    st.image("./knitlogo.png", width = 80)
+with col2: 
+    st.markdown("## PLACEMENT DASHBOARD 2026")
+    st.markdown("### KNIT Sultanpur")
 
 #loading data
 df = pd.read_excel("./Placement Sheet 2025-26(On Campus + Off Campus).xlsx")
