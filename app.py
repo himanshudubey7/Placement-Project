@@ -2,13 +2,19 @@ import streamlit as st
 import pandas as pd
 import numpy as np  
 import os
+from dotenv import load_dotenv
 import matplotlib.pyplot as plt
-
-import PyPDF2
 from google import genai
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+if not GEMINI_API_KEY:
+    try:
+        GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+    except:
+        st.error("API key missing")
+        st.stop()
 client = genai.Client(api_key= GEMINI_API_KEY)
 
 def ask_gemini(question, policy_text):
@@ -36,10 +42,10 @@ def ask_gemini(question, policy_text):
 st.set_page_config(page_title= "Placement Dashboard 2026- KNIT", layout= 'wide')
 
 # st.title("Placement Dashboard 2026 - KNIT Sultanpur")
-col1, col2 = st.coloumns([1,5])
+col1, col2 = st.columns([5,5])
 
 with col1:
-    st.image("./knitlogo.png", width = 80)
+    st.image("./knitlogo.png", width = 1800)
 with col2: 
     st.markdown("## PLACEMENT DASHBOARD 2026")
     st.markdown("### KNIT Sultanpur")
@@ -72,6 +78,25 @@ if page == "Home":
     col4.metric("Highest Package(LPA)", highest_package)
     col5.metric("Average Package(LPA)", f"{average_package:.2f}")
 
+    st.divider()
+
+    st.subheader("Download Placement Summary")
+
+    summary_data = df.groupby("Branch")["Package(LPA)"].agg(
+        Students_Placed="count",
+        Highest_Package="max",
+        Average_Package="mean"
+    ).reset_index()
+
+    csv = summary_data.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+    label="📥 Download Placement Summary (CSV)",
+    data=csv,
+    file_name="Placement_Summary_2026.csv",
+    mime="text/csv"
+    )
+
 
 #--------------------- Companies Page -----------------------    
 elif page == "Companies":
@@ -90,36 +115,37 @@ elif page == "Companies":
 
 #------------------------------------Statistics Page ---------------------- 
 elif page == "Statistics":
-    st.header("Placement Statistics")
-    st.subheader("Branch wise Placement")
-    branchgroup = df.groupby("Branch")
 
-    branchstats = branchgroup["Package(LPA)"].agg(
-        students_placed = "count",
-        highestpkg = "max",
-        avgpkg = "mean"
-    ).reset_index()
+    st.header("📊 Placement Statistics")
 
-    branchstats["Placement %"] =(branchstats["students_placed"]/60)*100
+    tab1, tab2 = st.tabs(["Branch Statistics", "Package Analysis"])
 
-    st.dataframe(branchstats, use_container_width= True)
+    with tab1:
+        branchgroup = df.groupby("Branch")
 
-    st.subheader("Branch-wise Placement Count")
-    
-    st.bar_chart(
-        branchstats.set_index("Branch")["students_placed"]
-    )
+        branchstats = branchgroup["Package(LPA)"].agg(
+            students_placed="count",
+            highestpkg="max",
+            avgpkg="mean"
+        ).reset_index()
 
+        branchstats["Placement %"] = (
+            branchstats["students_placed"] / 60 * 100
+        ).round(2)
 
-    st.subheader("Package Distribution")
+        st.dataframe(branchstats, use_container_width=True)
 
-    fig, ax = plt.subplots()
-    ax.hist(df["Package(LPA)"], bins = 10)
-    ax.set_xlabel("Package(LPA)")
-    ax.set_ylabel("Number of Students")
-    ax.set_title("Package Distribution")
-    st.pyplot(fig)
+        st.bar_chart(
+            branchstats.set_index("Branch")["students_placed"]
+        )
 
+    with tab2:
+        fig, ax = plt.subplots()
+        ax.hist(df["Package(LPA)"], bins=10)
+        ax.set_xlabel("Package (LPA)")
+        ax.set_ylabel("Number of Students")
+        ax.set_title("Package Distribution")
+        st.pyplot(fig)
 
 #--------------------------chatbot page --------------------------
 
