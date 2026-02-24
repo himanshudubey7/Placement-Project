@@ -1,12 +1,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np  
+import os
 import matplotlib.pyplot as plt
 
 import PyPDF2
 from google import genai
 
-client = genai.Client(api_key="YOUR API KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
+
+client = genai.Client(api_key= GEMINI_API_KEY)
 
 for m in client.models.list():
     print(m.name)
