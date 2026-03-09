@@ -30,7 +30,7 @@ This system reduces manual work, improves transparency, and enhances decision-ma
 ### 🤖 Placement Policy Assistant
 
 * Interactive chatbot interface
-* Dream / Super Dream policy validation
+* Normal / Dream policy validation
 * Offer eligibility calculation logic
 * Package difference comparison system
 
